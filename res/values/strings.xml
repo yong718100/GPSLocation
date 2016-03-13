@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Get GPS Data</string>
+    <string name="app_name">GPSLocation</string>
+    <string name="location_listener_title">------GPS Data obtained from locationListener------</string>
+    <string name="nmea_listener_title">------GPS Data obtained from NmeaListener------</string>
+    <string name="row_split"></string>
+
+</resources>
