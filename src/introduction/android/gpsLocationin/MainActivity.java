@@ -4,8 +4,6 @@ import introduction.android.gpsLocation.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.GpsStatus;
 import android.location.GpsStatus.NmeaListener;
 import android.location.Location;   //
 import android.location.LocationListener;
@@ -21,7 +19,6 @@ public class MainActivity extends Activity {
 	private TextView mLocationListenerInfo, mNmeaListenerInfo, mNmeaListenerInfoGprmc, mNmeaListenerInfoFixGpgsa;
 	
 	private LocationManager mLocationManager;  
-	private Location mLocation = null;
 	
 	public final static String TAG = "MainActivity";
 	
@@ -50,9 +47,6 @@ public class MainActivity extends Activity {
 		}
 
 		Log.i(TAG, "Gps.open...");
-
-		String bestProvider = mLocationManager.getBestProvider(getCriteria(), true);
-		mLocation = mLocationManager.getLastKnownLocation(bestProvider);
 		
 		// register NmeaListener
 		mLocationManager.addNmeaListener(new NmeaListener() {
@@ -145,61 +139,13 @@ public class MainActivity extends Activity {
 			
 		});
 		
-		// register GpsStatus.Listener
-		mLocationManager.addGpsStatusListener(new GpsStatus.Listener() {
-			public void onGpsStatusChanged(int event) {
-
-				switch (event) {
-
-				case GpsStatus.GPS_EVENT_FIRST_FIX:
-					Log.i(TAG, "GPS: FIRST FIX");
-					Toast.makeText(MainActivity.this, "GPS: FIRST FIX", Toast.LENGTH_SHORT).show();
-					break;
-
-				case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-
-					if (mLocationManager == null) {
-						Log.e(TAG, "GPS_EVENT_SATELLITE_STATUS mLocationManager null ........");
-						return;
-					}
-
-					// 得到卫星序列
-//					GpsStatus gpsStatus = mLocationManager.getGpsStatus(null);
-//					int maxSatellites = gpsStatus.getMaxSatellites();
-//					Iterator<GpsSatellite> iters = gpsStatus.getSatellites().iterator();
-//					int sitecount = 0;
-//					while (iters.hasNext() && sitecount <= maxSatellites) {
-//						GpsSatellite s = iters.next();
-//						sitecount++;
-//					}
-//					Log.i(TAG, "GPS:" + sitecount + " site");
-//					Log.e(TAG, "GPS_EVENT_SATELLITE_STATUS............................");
-					paresGpsData(mLocation);
-
-					break;
-
-				case GpsStatus.GPS_EVENT_STARTED:
-					Log.i(TAG, "GPS: STARTED");
-					Toast.makeText(MainActivity.this, "GPS: STARTED", Toast.LENGTH_SHORT).show();
-					break;
-				case GpsStatus.GPS_EVENT_STOPPED:
-					Log.i(TAG, "GPS: STOPPED");
-					Toast.makeText(MainActivity.this, "GPS: STOPPED", Toast.LENGTH_SHORT).show();
-					break;
-				}
-			}
-		});
-		
 		mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
 			
 			public void onLocationChanged(Location location) {
 				Log.e(TAG, "onLocationChanged............................");
-				mLocation = location;
-				paresGpsData(location);
 			}
 
-			public void onStatusChanged(String provider, int status,
-					Bundle extras) {
+			public void onStatusChanged(String provider, int status, Bundle extras) {
 				switch (status) {
 
 				case LocationProvider.AVAILABLE:
@@ -225,7 +171,6 @@ public class MainActivity extends Activity {
 			public void onProviderEnabled(String provider) {
 				Log.e(TAG, "onProviderEnabled............................");
 				Toast.makeText(MainActivity.this, "GPS: onProviderEnabled()", Toast.LENGTH_SHORT).show();
-				paresGpsData(mLocationManager.getLastKnownLocation(provider));
 			}
 
 			/**
@@ -234,48 +179,7 @@ public class MainActivity extends Activity {
 			public void onProviderDisabled(String provider) {
 				Log.e(TAG, "onProviderDisabled............................");
 				Toast.makeText(MainActivity.this, "GPS: onProviderDisabled()", Toast.LENGTH_SHORT).show();
-				paresGpsData(null);
 			}
 		});
-
-		if (mLocation != null) {
-			mLocation.reset();
-		}
-	}
-	
-	/**
-     * Set filter conditions
-     */
-	private Criteria getCriteria(){  
-        Criteria criteria=new Criteria();  
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);      
-        criteria.setSpeedRequired(true);  
-        criteria.setCostAllowed(false);  
-        criteria.setBearingRequired(true);  
-        criteria.setAltitudeRequired(false);  
-        criteria.setPowerRequirement(Criteria.POWER_LOW);  
-        return criteria;  
-    }
-	
-	/**
-     * GPS Data obtained from locationListener
-     */
-	private void paresGpsData(Location location) {
-		if (location != null) {
-
-			String locationListenerGpsData = "Longitude: " + location.getLongitude() + "\n"
-					+ "Latitude: " + location.getLatitude() + "\n" 
-					+ "Speed: " + location.getSpeed() + "\n" 
-					+ "getBearing: " + location.getBearing() + "\n";
-
-			Log.i(TAG, locationListenerGpsData);
-			
-			mLocationListenerInfo.setText(locationListenerGpsData);
-
-		} else {
-			Log.e(TAG, "GPS: location null");
-			
-			mLocationListenerInfo.setText("");
-		}
 	}
 }
